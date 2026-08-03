@@ -2,8 +2,8 @@ package sms9UbetInvoker
 
 import (
 	"encoding/json"
-	"github.com/leo202465/sms9UbetInvoker/cryptor"
-	"github.com/leo202465/sms9UbetInvoker/httpClient"
+	"github.com/BenBera/sms9UbetInvoker/cryptor"
+	"github.com/BenBera/sms9UbetInvoker/httpClient"
 )
 
 type RegAccountResp struct {

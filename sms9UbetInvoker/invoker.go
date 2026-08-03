@@ -1,7 +1,7 @@
 package sms9UbetInvoker
 
 import (
-	"github.com/leo202465/sms9UbetInvoker/cryptor"
+	"github.com/BenBera/sms9UbetInvoker/cryptor"
 )
 
 // 创建一个请求器
