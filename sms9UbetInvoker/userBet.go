@@ -2,6 +2,7 @@ package sms9UbetInvoker
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/leo202465/sms9UbetInvoker/cryptor"
 	"github.com/leo202465/sms9UbetInvoker/httpClient"
 )
@@ -32,15 +33,20 @@ func (this BetResp) GetData() BetData {
 }
 
 // 获取游戏列表
-func (this Invoker) UserBet(_mobile string, _gameId string, _content string) (error, *BetResp) {
+func (this Invoker) UserBet(_mobile string, _gameId string, _content SMSBetRequest) (error, *BetResp) {
 	hc := httpClient.NewClient(this.baseUrl + "/do/bet")
 	hc.SetMethod("POST")
 	hc.SetHeaders("KEY-SHOPID", this.shopId)
 
+	contentJSON, err := json.Marshal(_content)
+	if err != nil {
+		return fmt.Errorf("marshal SMS bet request: %w", err), nil
+	}
+
 	params := map[string]any{
 		"mobile":    _mobile,
 		"game_uuid": _gameId,
-		"content":   _content,
+		"content":   string(contentJSON),
 	}
 	reqBody := this.Sign(params)
 	hc.SetBody([]byte(cryptor.JsonEncode(map[string]any{
@@ -51,9 +57,10 @@ func (this Invoker) UserBet(_mobile string, _gameId string, _content string) (er
 	if err != nil {
 		return err, nil
 	}
-	var respObj BetResp
-	if err := resp.ToObj(&respObj); err != nil {
-		return err, nil
+	var betResp BetResp
+	if err := json.Unmarshal([]byte(resp.Body), &betResp); err != nil {
+		return fmt.Errorf("decode bet response: %w", err), nil
 	}
-	return err, &respObj
+
+	return err, &betResp
 }
