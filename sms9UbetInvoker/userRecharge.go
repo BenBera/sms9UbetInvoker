@@ -17,6 +17,8 @@ type UserRechargeData struct {
 	Price     float64 `json:"price"`
 	RealPrice float64 `json:"real_price"`
 	Tax       float64 `json:"tax"`
+	Status    string  `json:"status"`
+	Amount    float64 `json:"amount"`
 }
 
 func (this UserRechargeResp) GetData() UserRechargeData {
@@ -41,6 +43,32 @@ func (this Invoker) UserRecharge(_mobile string, _price float64) (error, *UserRe
 	params := map[string]any{
 		"mobile": _mobile,
 		"price":  _price,
+	}
+	reqBody := this.Sign(params)
+	hc.SetBody([]byte(cryptor.JsonEncode(map[string]any{
+		"data": reqBody,
+	})))
+
+	err, resp := hc.Do()
+	if err != nil {
+		return err, nil
+	}
+	var respObj UserRechargeResp
+	if err := resp.ToObj(&respObj); err != nil {
+		return err, nil
+	}
+	return err, &respObj
+}
+
+// UserReconcile Jisorts an M-Pesa Paybill receipt via /do/reconcile.
+func (this Invoker) UserReconcile(_mobile, _receipt string) (error, *UserRechargeResp) {
+	hc := httpClient.NewClient(this.baseUrl + "/do/reconcile")
+	hc.SetMethod("POST")
+	hc.SetHeaders("KEY-SHOPID", this.shopId)
+
+	params := map[string]any{
+		"mobile":    _mobile,
+		"reference": _receipt,
 	}
 	reqBody := this.Sign(params)
 	hc.SetBody([]byte(cryptor.JsonEncode(map[string]any{
