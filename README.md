@@ -29,6 +29,10 @@ invoker.RegAccount("012345678")
     // payment
     UserRecharge(_mobile string, _price float64)
 ```
+
+Used by **shortcode-service** to call ApiGate `/do/recharge`. The client is fine;
+channel routing must match web inside `ApiUserRecharge` (see ApiGateServer).
+
 > Possible Resp:
 - Code: 1008, Msg: mobile_invalid
   means mobile format is invalid, please use valid mobile number
@@ -44,6 +48,26 @@ invoker.RegAccount("012345678")
   means the price must large than min price, the min price is in data param of response 
 - Code: 10009, Msg: must_be_small_than_max_price
   means the price must less than max price, the max price is in data param of response
+
+
+```go
+    // Jisort a Paybill receipt that was paid but not credited
+    UserReconcile(_mobile string, _receipt string)
+```
+
+Used by **shortcode-service** to call ApiGate `/do/reconcile`. Same signed `data`
+envelope as recharge. Fields: `mobile` plus `reference` (also `receipt` / `ref`).
+Amount is optional. SMS Jisort only credits Paybill `3014444`.
+
+> Possible Resp:
+- Code: 1008, Msg: mobile_invalid
+- Code: 10000, Msg: receipt_invalid
+- Code: 40001, Msg: account_not_found
+- Code: 10093, Msg: mpesa_receipt_not_found
+- Code: 10094, Msg: mpesa_receipt_mismatch
+- Code: 10095, Msg: mpesa_receipt_manual_review
+- Code: 10096, Msg: mpesa_receipt_retry
+- Code: 0, Msg: ok — `data.status` is `credited` or `already_processed`
 
 
 ```go
